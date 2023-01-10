@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+enum ECommandResponseCode{
+  E_COMMAND_INVALID = 0; // 无效命令
+  E_COMMAND_ERROR = 1; // 命令出错
+  E_COMMAND_OK = 2; // 命名无误
+  E_COMMAND_NOT_EXIST_FILE = 3; // 不存在文件
+};
+
+enum EDownloadStatus{
+  E_DOWNLOAD_LUNCH = 0; // 发起文件下载
+  E_DOWNLOAD_ING = 1; // 文件下载中
+  E_DOWNLOAD_DONE = 2; // 文件下载完毕
+  E_DOWNLOAD_ERROR = 3; // 文件下载错误
+}
+
+/*
+list 请求消息
+*/
+message RequestList{
+
+}
+/*
+list 响应消息
+*/
+message ResponseList{
+  ECommandResponseCode res_code = 1;//响应结果
+  string list = 2;//响应成功之后的结果
+}
+
+/*
+get 请求消息 请求下载文件 主要确认是否有文件
+*/
+message RequestGet{
+  string file_path = 1; // 文件路径 目前只做文件名
+}
+/*
+get 响应消息 请求下载文件 返回是否有文件 等内容
+*/
+message ResponseGet{
+  ECommandResponseCode res_code = 1;//响应结果
+}
+
+/*
+pasv 请求消息 请求开启数据传输链
+*/
+message RequestPASV{
+
+}
+
+/*
+pasv 响应消息 返回客户端需要链接的用于数据传输的服务器信息
+*/
+message ResponsePASV{
+  ECommandResponseCode res_code = 1; // 响应结果
+  string ip = 2; // 服务器开启的数据链 ip
+  int64 hash_port = 3; // 服务器开启的端口 hash 值
+}
+
+/*
+download 请求消息 用于客户端 发起传输请求 以及 确认下载的文件内容
+*/
+message RequestDownload{
+  EDownloadStatus status = 1; // 文件下载状态
+  int32 buffer_size = 2; // 请求下载的字节大小
+  int32 offset = 3; // 文件从offset位置处下载
+}
+
+/*
+download 响应消息 用于服务器 响应传输请求
+*/
+message ResponseDownload{
+  EDownloadStatus status = 1; // 文件下载状态
+  int64 file_size = 2; // 文件总大小
+  bytes file_info = 3; // 文件内容
+  int64 file_info_size = 4; // 文件内容大小
+}
+
+//消息结构
+message PBMessage{
+  oneof msg{
+    RequestList request_list = 1; // list 请求
+    ResponseList response_list = 2; // list 响应
+
+    RequestGet request_get = 3; // get 请求
+    ResponseGet response_get = 4; // get 响应
+
+    RequestDownload request_download = 5; // down 请求
+    ResponseDownload response_download = 6; // down 响应
+
+    RequestPASV request_pasv = 7; // pasv 请求
+    ResponsePASV response_pasv = 8; // pasv 响应
+  }
+}
+
+
